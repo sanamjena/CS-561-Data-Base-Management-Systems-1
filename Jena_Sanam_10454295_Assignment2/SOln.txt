@@ -1,0 +1,4 @@
+q3 => vaish q1 (a & c) b needs to be computed
+q2 => vaish q2 (similar need to change quarter to month)
+q4 => vaish q4 (similar need to change 2/3 -> 1/3) ParasGarg q3// exact match
+

@@ -1,0 +1,126 @@
+with quat1 as(
+select cust, prod, sum(quant)/count(quant) as avg_cusprd
+from sales 
+where month in (1)
+group by cust,prod
+order by cust,prod),
+quat2 as(
+select cust, prod, sum(quant)/count(quant) as avg_cusprd
+from sales 
+where month in (2)
+group by cust,prod
+order by cust,prod),
+quat3 as(
+select cust, prod, sum(quant)/count(quant) as avg_cusprd
+from sales 
+where month in (3)
+group by cust,prod
+order by cust,prod),
+quat4 as(
+select cust, prod, sum(quant)/count(quant) as avg_cusprd
+from sales 
+where month in (4)
+group by cust,prod
+order by cust,prod),
+quat5 as(
+select cust, prod, sum(quant)/count(quant) as avg_cusprd
+from sales 
+where month in (5)
+group by cust,prod
+order by cust,prod),
+quat6 as(
+select cust, prod, sum(quant)/count(quant) as avg_cusprd
+from sales 
+where month in (6)
+group by cust,prod
+order by cust,prod),
+quat7 as(
+select cust, prod, sum(quant)/count(quant) as avg_cusprd
+from sales 
+where month in (7)
+group by cust,prod
+order by cust,prod),
+quat8 as(
+select cust, prod, sum(quant)/count(quant) as avg_cusprd
+from sales 
+where month in (8)
+group by cust,prod
+order by cust,prod),
+quat9 as(
+select cust, prod, sum(quant)/count(quant) as avg_cusprd
+from sales 
+where month in (9)
+group by cust,prod
+order by cust,prod),
+quat10 as(
+select cust, prod, sum(quant)/count(quant) as avg_cusprd
+from sales 
+where month in (10)
+group by cust,prod
+order by cust,prod),
+quat11 as(
+select cust, prod, sum(quant)/count(quant) as avg_cusprd
+from sales 
+where month in (11)
+group by cust,prod
+order by cust,prod),
+quat12 as(
+select cust, prod, sum(quant)/count(quant) as avg_cusprd
+from sales 
+where month in (12)
+group by cust,prod
+order by cust,prod),
+
+all_avg as (
+select quat1.cust as customer, quat1.prod as product, 
+quat1.avg_cusprd as Q1_Avg, quat2.avg_cusprd as Q2_Avg, quat3.avg_cusprd as Q3_Avg, quat4.avg_cusprd as Q4_Avg, quat5.avg_cusprd as Q5_Avg, quat6.avg_cusprd as Q6_Avg, quat7.avg_cusprd as Q7_Avg, quat8.avg_cusprd as Q8_Avg, quat9.avg_cusprd as Q9_Avg, quat10.avg_cusprd as Q10_Avg, quat11.avg_cusprd as Q11_Avg, quat12.avg_cusprd as Q12_Avg
+from quat1,quat2,quat3,quat4,quat5,quat6,quat7,quat8,quat9,quat10,quat11,quat12
+where 
+quat1.cust=quat2.cust and quat3.cust=quat1.cust and quat4.cust=quat1.cust and quat5.cust=quat1.cust and quat6.cust=quat1.cust and quat7.cust=quat1.cust and quat8.cust=quat1.cust and quat9.cust=quat1.cust and quat10.cust=quat1.cust and quat11.cust=quat1.cust and quat12.cust=quat1.cust and
+quat1.prod=quat2.prod and quat3.prod=quat1.prod and quat4.prod=quat1.prod and quat5.prod=quat1.prod and quat6.prod=quat1.prod and quat7.prod=quat1.prod and quat8.prod=quat1.prod and quat9.prod=quat1.prod and quat10.prod=quat1.prod and quat11.prod=quat1.prod and quat12.prod=quat1.prod ),
+quarters as(
+select customer, product, generate_series(1,12) as quarter
+from all_avg)
+
+select q.customer, q.product, q.quarter as month, 
+case when quarter = 1 then null
+when quarter = 2 then a.q1_avg
+when quarter = 3 then a.q2_avg
+when quarter = 4 then a.q3_avg
+when quarter = 5 then a.q4_avg
+when quarter = 6 then a.q5_avg
+when quarter = 7 then a.q6_avg
+when quarter = 8 then a.q7_avg
+when quarter = 9 then a.q8_avg
+when quarter = 10 then a.q9_avg
+when quarter = 11 then a.q10_avg
+when quarter = 12 then a.q11_avg
+end as before_avg,
+case when quarter = 1 then a.q1_avg
+when quarter = 2 then a.q2_avg
+when quarter = 3 then a.q3_avg
+when quarter = 4 then a.q4_avg
+when quarter = 5 then a.q5_avg
+when quarter = 6 then a.q6_avg
+when quarter = 7 then a.q7_avg
+when quarter = 8 then a.q8_avg
+when quarter = 9 then a.q9_avg
+when quarter = 10 then a.q10_avg
+when quarter = 11 then a.q11_avg
+when quarter = 12 then a.q12_avg
+end as during_avg,
+case when quarter = 1 then a.q2_avg
+when quarter = 2 then a.q3_avg
+when quarter = 3 then a.q4_avg
+when quarter = 4 then a.q5_avg
+when quarter = 5 then a.q6_avg
+when quarter = 6 then a.q7_avg
+when quarter = 7 then a.q8_avg
+when quarter = 8 then a.q9_avg
+when quarter = 9 then a.q10_avg
+when quarter = 10 then a.q11_avg
+when quarter = 11 then a.q12_avg
+when quarter = 12 then null
+end as after_avg
+from quarters q, all_avg a
+where q.customer=a.customer and q.product=a.product

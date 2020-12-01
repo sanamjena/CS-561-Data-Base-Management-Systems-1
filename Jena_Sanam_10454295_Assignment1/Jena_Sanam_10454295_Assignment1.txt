@@ -1,0 +1,128 @@
+--Query1 by Sanam Sritam Jena CWID: 10454295
+WITH actual_sales AS
+(
+	SELECT cust, min(quant) AS min_q, max(quant) AS max_q, avg(quant) AS avg_q
+	FROM sales
+	GROUP BY cust 
+),
+min_sales AS
+(
+	SELECT A1.cust, min_q, S.prod, S.day, S.month, S.year, S.state
+	FROM actual_sales A1, sales S
+	WHERE A1.cust = S.cust AND min_q = S.quant
+),
+max_sales AS
+(
+	SELECT A2.cust, max_q, S.prod, S.day, S.month, S.year, S.state
+	FROM actual_sales A2, sales S
+	WHERE A2.cust = S.cust AND max_q = S.quant
+)
+SELECT A.cust, A.min_q, MIN.prod, concat(MIN.month,'/',MIN.day,'/',MIN.year) as Min_Date, MIN.state as ST, A.max_q, MAX.prod, concat(MAX.month,'/',MAX.day,'/',MAX.year) as MAX_DATE, MAX.state as ST, round(A.avg_q) as AVG_Q
+FROM min_sales AS MIN, max_sales AS MAX, actual_sales AS A
+WHERE MIN.cust = MAX.cust AND MIN.cust = A.cust AND MAX.cust = A.cust
+
+
+--Query2 by Sanam Sritam Jena CWID: 10454295
+with prodQuant as(
+select s.month, day, sum(quant) sumQuant
+from sales s
+group by s.month, day
+order by 1,3 DESC),
+t1 as(
+select a.month,
+a.day as Most_Profit_Day, a.sumQuant as Most_Profit_Total_Q,
+b.day as Least_Profit_Day, b.sumQuant as Least_Profit_Total_Q
+from prodQuant a
+inner join prodQuant b on a.month = b.month
+where a.sumQuant in (select max(sumQuant) from prodQuant group by month)
+),t2 as(
+select month,min(sumQuant) from prodQuant group by month )
+	select t1.month,
+t1.Most_Profit_Day as Most_Profit_Day, t1.Most_Profit_Total_Q as Most_Profit_Total_Q,
+t1.Most_Profit_Day as Least_Profit_Day, t2.min as Least_Profit_Total_Q
+from t1 inner join t2 on t1.month=t2.month and t2.min=t1.Least_Profit_Total_Q
+
+
+--Query3 by Sanam Sritam Jena CWID: 10454295
+with MostFavMon as
+(select s.prod, month as MostFavMonth from sales s
+where quant in (select max(t.quant) from sales t where s.prod = t.prod group by prod)),
+LeastFavMon as(
+select s.prod, month as LeastFavMonth from sales s
+where quant in (select min(t.quant) from sales t where s.prod = t.prod group by prod))
+
+select m.prod as PRODUCT, mostfavmonth as MOST_FAV_MO, leastfavmonth as LEAST_FAV_MO from mostfavmon m
+full outer join leastfavmon l on m.prod=l.prod
+order by 1
+
+
+--Query4 by Sanam Sritam Jena CWID: 10454295
+with temp1 as(
+select s.cust as Customer, s.prod as Product, 
+cast(avg(q1.quant) as decimal(10,2)) as Q1_Avg,
+cast(avg(q2.quant) as decimal(10,2)) as Q2_Avg,
+cast(avg(q3.quant) as decimal(10,2)) as Q3_Avg,
+cast(avg(q4.quant) as decimal(10,2)) as Q4_Avg,
+cast(avg(s.quant) as decimal(10,2)) as Average, sum(s.quant) as Total, count(s.quant) as Count
+from sales s
+full outer join sales q1 on q1.cust=s.cust and q1.prod = s.prod and q1.month in (1,2,3)
+full outer join sales q2 on q2.cust=s.cust and q2.prod = s.prod and q2.month in (4,5,6)
+full outer join sales q3 on q3.cust=s.cust and q3.prod = s.prod and q3.month in (7,8,9)
+full outer join sales q4 on q4.cust=s.cust and q4.prod = s.prod and q4.month in (10,11,12)
+group by s.cust, s.prod
+order by 1, 2)
+select * from temp1 where Customer is not null and Product is not null
+
+
+--Query5 by Sanam Sritam Jena CWID: 10454295
+--IMP -> CREATE THE VIEWS ONE AFTER THE OTHER INDIVIDUALLY THEN EXECUTE THE FINAL QUERY
+--drop view NJMax_Sales;
+create view NJMax_Sales
+as
+with temp2 as(
+select r.cust as Customer, r.prod as Product, max(r.quant) as NJ_MAX
+from sales r 
+where r.state='NJ'
+group by r.cust, r.prod
+order by 1,2		 
+) 
+select Customer, Product, NJ_MAX, concat(s.month,'/',s.day,'/',s.year) as NJ_MaxDate 
+from temp2 t, sales s
+where NJ_MAX=quant and Customer=cust and Product=prod
+order by 1,2
+
+--drop view NYMax_Sales;
+create view NYMax_Sales
+as
+with temp1 as(
+select r.cust as Customer, r.prod as Product, max(r.quant) as NY_MAX
+from sales r 
+where r.state='NY'
+group by r.cust, r.prod
+order by 1,2		 
+) 
+select Customer, Product, NY_MAX, concat(s.month,'/',s.day,'/',s.year) as NY_MaxDate 
+from temp1 t, sales s
+where NY_MAX=quant and Customer=cust and Product=prod
+order by 1,2
+
+--drop view CTMax_Sales;
+create view CTMax_Sales
+as
+with temp3 as(
+select r.cust as Customer, r.prod as Product, max(r.quant) as CT_MAX
+from sales r 
+where r.state='CT'
+group by r.cust, r.prod
+order by 1,2		 
+) 
+select Customer, Product, CT_MAX, concat(s.month,'/',s.day,'/',s.year) as CT_MaxDate 
+from temp3 t, sales s
+where CT_MAX=quant and Customer=cust and Product=prod
+order by 1,2
+
+select ny.customer, ny.product,
+NJ_MAX, NJ_MaxDate as DATE, NY_MAX, NY_MaxDate as DATE, CT_MAX, CT_MaxDate as DATE
+from NYMax_sales as ny
+left outer join NJMax_Sales as nj on nj.customer = ny.customer and nj.product = ny.product
+left outer join CTMax_Sales as ct on ct.customer = nj.customer and ct.product = nj.product

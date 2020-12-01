@@ -1,0 +1,362 @@
+--Query1 by Sanam Sritam Jena CWID: 10454295
+with
+    avgm
+    as
+    
+    (
+        select
+            s.prod ,
+            smon.month,
+            ( select avg(quant)
+            from sales s2
+            where s2.prod=s.prod and s2.month=smon.month) as avge
+        from sales as s, (select distinct month
+            from sales) smon
+        group by s.prod,smon.month
+    )
+select
+    s.prod as "PRODUCT",
+    m.month as "MONTH",
+    (select count(*)
+    from sales s1
+    where s1.month=m.month and s.prod=s1.prod and
+        ((s1.quant>(select avge
+        from avgm
+        where avgm.prod=s.prod and avgm.month=m.month-1) and
+        s1.quant<(select avge
+        from avgm
+        where avgm.prod=s.prod and avgm.month=m.month+1)
+	)
+        or
+        (s1.quant<(select avge
+        from avgm
+        where avgm.prod=s.prod and avgm.month=m.month-1)
+        and s1.quant>(select avge
+        from avgm
+        where avgm.prod=s.prod and avgm.month=m.month+1)
+	))
+) as "SALES_COUNT_BETWEEN_AVGS"
+from sales s, (select distinct month
+    from sales) as m
+group by m.month,s.prod
+order by s.prod,m.month
+
+
+
+--Query2 by Sanam Sritam Jena CWID: 10454295
+with
+    q1
+    as
+    (
+        select cust, prod, round(avg(quant),0) as quant
+        from sales
+        where month = 1
+        group by cust, prod
+    ),
+
+    q2
+    as
+    (
+        select cust, prod, round(avg(quant),0) as quant
+        from sales
+        where month = 2
+        group by cust, prod
+    ),
+
+    q3
+    as
+    (
+        select cust, prod, round(avg(quant),0) as quant
+        from sales
+        where month = 3
+        group by cust, prod
+    ),
+
+    q4
+    as
+    (
+        select cust, prod, round(avg(quant),0) as quant
+        from sales
+        where month = 4
+        group by cust, prod
+    ),
+
+    q5
+    as
+    (
+        select cust, prod, round(avg(quant),0) as quant
+        from sales
+        where month = 5
+        group by cust, prod
+    ),
+
+    q6
+    as
+    (
+        select cust, prod, round(avg(quant),0) as quant
+        from sales
+        where month = 6
+        group by cust, prod
+    ),
+
+    q7
+    as
+    (
+        select cust, prod, round(avg(quant),0) as quant
+        from sales
+        where month = 7
+        group by cust, prod
+    ),
+
+    q8
+    as
+    (
+        select cust, prod, round(avg(quant),0) as quant
+        from sales
+        where month = 8
+        group by cust, prod
+    ),
+
+    q9
+    as
+    (
+        select cust, prod, round(avg(quant),0) as quant
+        from sales
+        where month = 9
+        group by cust, prod
+    ),
+
+    q10
+    as
+    (
+        select cust, prod, round(avg(quant),0) as quant
+        from sales
+        where month = 10
+        group by cust, prod
+    ),
+
+    q11
+    as
+    (
+        select cust, prod, round(avg(quant),0) as quant
+        from sales
+        where month = 11
+        group by cust, prod
+    ),
+
+    q12
+    as
+    (
+        select cust, prod, round(avg(quant),0) as quant
+        from sales
+        where month = 12
+        group by cust, prod
+    ),
+
+    base
+    as
+    (
+        select cust, prod
+        from sales
+        group by cust, prod
+    ),
+
+    t1
+    as
+    (
+        select b.cust, b.prod, cast('1' as int) as month, cast(null as numeric) as before_avg, q1.quant as during_avg, q2.quant as after_avg
+        from base as b left join q1 using(cust, prod
+    ) left join q2 using
+(cust, prod)), 
+
+t2 as
+(select b.cust, b.prod, cast('2' as int) as month, q1.quant as before_avg, q2.quant as during_avg, q3.quant as after_avg
+from base as b left join q1 using(cust, prod)
+left join q2 using
+(cust, prod) left join q3 using
+(cust, prod)), 
+
+t3 as
+(select b.cust, b.prod, cast('3' as int) as month, q2.quant as before_avg, q3.quant as during_avg, q4.quant as after_avg
+from base as b left join q2 using(cust, prod)
+left join q3 using
+(cust, prod) left join q4 using
+(cust, prod)),
+
+t4 as
+(select b.cust, b.prod, cast('4' as int) as month, q3.quant as before_avg, q4.quant as during_avg, q5.quant as after_avg
+from base as b left join q3 using(cust, prod)
+left join q4 using
+(cust, prod) left join q5 using
+(cust, prod)),
+
+t5 as
+(select b.cust, b.prod, cast('5' as int) as month, q4.quant as before_avg, q5.quant as during_avg, q6.quant as after_avg
+from base as b left join q4 using(cust, prod)
+left join q5 using
+(cust, prod) left join q6 using
+(cust, prod)),
+
+t6 as
+(select b.cust, b.prod, cast('6' as int) as month, q5.quant as before_avg, q6.quant as during_avg, q7.quant as after_avg
+from base as b left join q5 using(cust, prod)
+left join q6 using
+(cust, prod) left join q7 using
+(cust, prod)),
+
+t7 as
+(select b.cust, b.prod, cast('7' as int) as month, q6.quant as before_avg, q7.quant as during_avg, q8.quant as after_avg
+from base as b left join q6 using(cust, prod)
+left join q7 using
+(cust, prod) left join q8 using
+(cust, prod)),
+
+t8 as
+(select b.cust, b.prod, cast('8' as int) as month, q7.quant as before_avg, q8.quant as during_avg, q9.quant as after_avg
+from base as b left join q7 using(cust, prod)
+left join q8 using
+(cust, prod) left join q9 using
+(cust, prod)),
+
+t9 as
+(select b.cust, b.prod, cast('9' as int) as month, q8.quant as before_avg, q9.quant as during_avg, q10.quant as after_avg
+from base as b left join q8 using(cust, prod)
+left join q9 using
+(cust, prod) left join q10 using
+(cust, prod)),
+
+t10 as
+(select b.cust, b.prod, cast('10' as int) as month, q9.quant as before_avg, q10.quant as during_avg, q11.quant as after_avg
+from base as b left join q9 using(cust, prod)
+left join q10 using
+(cust, prod) left join q11 using
+(cust, prod)),
+
+t11 as
+(select b.cust, b.prod, cast('11' as int) as month, q10.quant as before_avg, q11.quant as during_avg, q12.quant as after_avg
+from base as b left join q10 using(cust, prod)
+left join q11 using
+(cust, prod) left join q12 using
+(cust, prod)), 
+
+t12 as
+(select b.cust, b.prod, cast('12' as int) as month, q11.quant as before_avg, q12.quant as during_avg, cast(null as numeric) as after_avg
+from base as b left join q11 using(cust, prod)
+left join q12 using
+(cust, prod)),
+
+t13 as
+(
+    select *
+    from t1
+union
+    select *
+    from t2
+union
+    select *
+    from t3
+union
+    select *
+    from t4
+union
+    select *
+    from t5
+union
+    select *
+    from t6
+union
+    select *
+    from t7
+union
+    select *
+    from t8
+union
+    select *
+    from t9
+union
+    select *
+    from t10
+union
+    select *
+    from t11
+union
+    select *
+    from t12)
+
+select t13.cust as "CUSTOMER" , t13.prod as "PRODUCT" , t13.month as "MONTH" , t13.before_avg as "BEFORE_AVG" , t13.during_avg as "DURING_AVG" , t13.after_avg as "AFTER_AVG"
+from t13
+order by cust,prod,month
+
+
+
+--Query3 by Sanam Sritam Jena CWID: 10454295
+with
+    t1
+    as
+    (
+        select cust, prod, cst.state, round(
+        (select avg(s1.quant)
+            from sales s1
+            where s1.cust=s.cust and s1.prod=s.prod and s1.state=cst.state)
+        ,0) as prod_avg
+        from sales s, (select distinct state
+            from sales) cst
+        group by cust, prod, cst.state
+    ),
+
+    t2
+    as
+    (
+        select t1.cust, t1.prod, t1.state, t1.prod_avg, round(avg(s.quant),0) as  other_cust_avg
+        from t1, sales as s
+        where t1.cust != s.cust and t1.prod = s.prod and t1.state = s.state
+        group by t1.cust, t1.prod, t1.state, t1.prod_avg
+    ),
+
+    t3
+    as
+    (
+        select t1.cust, t1.prod, t1.state, t1.prod_avg, round(avg(s.quant),0) as other_prod_avg
+        from t1, sales as s
+        where t1.cust = s.cust and t1.state = s.state and t1.prod != s.prod
+        group by t1.cust, t1.prod, t1.state, t1.prod_avg
+    )
+
+select t1.cust as "CUSTOMER", t1.prod as "PRODUCT", t1.state as "STATE", t1.prod_avg as "PROD_AVG", t2.other_cust_avg as "OTHER_CUST_AVG", t3.other_prod_avg as "OTHER_PROD_AVG"
+from (t1 full outer join t2 on t1.cust=t2.cust and t1.prod=t2.prod and t1.state=t2.state)
+    full outer join t3 on t1.cust=t3.cust and t1.prod=t3.prod and t1.state=t3.state
+order by t1.cust,t1.prod,t1.state
+
+
+
+--Query4 by Sanam Sritam Jena CWID: 10454295
+WITH
+	actsales
+	AS
+	(
+		SELECT cust, prod, month, sum(quant) AS monthly
+		FROM sales
+		GROUP BY cust, prod, month
+
+	),
+	totsales
+	AS
+	(
+		SELECT t1.cust, t1.prod, t1.month, sum(t2.monthly) AS tot
+		FROM actsales t1, actsales t2
+		WHERE t1.cust = t2.cust AND t1.prod = t2.prod AND t1.month >= t2.month
+		GROUP BY t1.cust, t1.prod, t1.month
+
+	),
+	onethreesales
+	AS
+	(
+		SELECT cust, prod, round(sum(monthly)/3,0) AS onethree
+		FROM actsales
+		GROUP BY cust, prod
+	)
+
+SELECT t1.cust AS "CUSTOMER", t1.prod AS "PRODUCT", min(t1.month) AS "1/3 PURCHASED BY MONTH"
+FROM totsales t1, onethreesales t2
+WHERE t1.cust = t2.cust AND t1.prod = t2.prod AND tot >= onethree
+GROUP BY t1.cust, t1.prod
